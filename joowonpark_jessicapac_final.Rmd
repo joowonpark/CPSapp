@@ -1,0 +1,446 @@
+---
+title: "Final Project"
+author: "Joo Won Park (jp3378)"
+date: "Fall 2017"
+output: html_notebook
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ 
+```{r}
+library(shiny)
+library(flexdashboard)
+library(markdown)
+
+
+ui <- fluidPage(
+  navbarPage("Tool for Child Protective Services",
+  tabPanel("Learning",
+    sidebarLayout(
+    sidebarPanel(
+                verbatimTextOutput("text"),
+                h4("Make a guess"),
+                br(),
+                p("Based on the following characteristics of the child and the circumstances of their report and investigation, please predict the likelihood that the child will be negatively affected if they are removed from their home and placed into foster care, relative to remaining at home."),
+pre("  Child\'s age, sex, and race"),
+pre("  The source of the initial maltreatment report (police, teacher, neighbor, etc.)"),
+pre("  The nature of the allegation (physical abuse, sexual abuse, etc.)"),
+p("With these factors in mind, move the knob on the slider to reflect your estimate. The leftmost position would indicate that there is no chance of the outcome occurring, and the rightmost position indicates that the outcome will definitely occur.")
+                ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(tabsetPanel(
+              tabPanel("Your Guess and Interpretation",
+                       fluidRow(
+                         column(12,
+                                h4("Juvenile Delinquency"), 
+                                p("Juvenile delinquency is defined as any involvement with the juvenile delinquency system, including but not limited to at least three arrests, any number of convictions, serving time in an institution, and referrals for service or intervention through a juvenile court, etc. Move the slider below the gauge to indicate your prediction as to the likelihood of the child becoming involved in the juvenile delinquency system, compared to remaining at home."),
+                                fluidRow(
+                                  column(6,
+                       gaugeOutput("guess1"),
+                       sliderInput("guess_jd","",value = 0,
+                        min = 0,
+                        max = 1,
+                        step = 0.1)),
+                                  column(6,p("1. Moving the slider to the rightmost position, marked \'1\' means that you believe that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, you predict that the child is less likely to become involved in the juvenile delinquency system if they enter foster care, compared to the risk of being involved in the juvenile delinquency system if the child remains at home."), 
+p("2. Moving the slider to the leftmost position, marked \'0\', means that you believe that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, you predict that the child is more likely to become involved in the juvenile delinquency system if they enter foster care, compared to the risk of being involved in the juvenile delinquency system if the child remains at home.
+"))
+                        ))),
+                       
+                        fluidRow(
+                        column(12,
+                               h4("Teen Motherhood"), 
+                               p("Teen motherhood is defined as a girl giving birth to a child at age 19 or younger. Move the slider below the gauge to indicate your prediction as to the likelihood of the child becoming a mother before age 19 if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                                 column(6,
+                        gaugeOutput("guess2"),
+                       sliderInput("guess_tm", "",value = 0,
+                        min = 0,
+                        max = 1,
+                        step = 0.1)),
+                                  column(6,p("1. Moving the slider to the rightmost position, marked \'1\' means that you believe that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, you predict that the child is less likely to become pregnant if they enter foster care, compared to the risk of pregnancy if the child remains at home."), 
+p("2. Moving the slider to the leftmost position, marked \'0\', means that you believe that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, you predict that the child is more likely to become pregnant if they enter foster care, compared to the risk of pregnancy if the child remains at home.
+"))
+                         ))),
+                       
+                        fluidRow(
+                        column(12,
+                               h4("Employment"),
+                               p("First, employment is measured as the fraction of quarters during the year that the child will be employed later in life when they\'re a young adult (between ages 18 through 28). For example, selecting -.25 would imply that as a young adult, a child who has been removed from the home and placed into foster care will work one less quarter of the year compared to those who remain at home. Move the slider below the gauge to indicate your prediction of the number of quarters out of the year you believe the child will be employed if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                                column(6,
+                      gaugeOutput("guess3"),
+                       sliderInput("guess_emp", "",value = 0,
+                        min = -0.5,
+                        max = 0.5,
+                        step = 0.01)),
+                                column(6, p("1. Moving the slider to the rightmost position, marked \'0.5\' means that you believe that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, you predict that the child is more likely to work the full year if they enter foster care, compared to the likelihood of working full year if the child remains at home."), 
+p("2. Moving the slider to the leftmost position, marked \'-0.5\', means that you believe that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, you predict that the child is less likely to work the full year if they enter foster care, compared to the likelihood of working full year if the child remains at home.
+"))
+                         ))),
+
+                      fluidRow(
+                        column(12,
+                               h4("Earning"),
+                               p("Second, we also measure employment as the average quarterly earnings that the child will earn later in life, when they\'re a young adult (between ages 18 through 28). For example, selecting $1,000 would suggest that as a young adult, a child who has been removed from the home and placed into foster care will earn an additional $1,000 per quarter compared to those who remain at home. Move the slider below the gauge to indicate your prediction of the quarterly earnings you believe the child will be receive if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                              column(6,
+                       gaugeOutput("guess4"),
+                       sliderInput("guess_earn", "",value = 0,
+                        min = -1500,
+                        max = 1500,
+                        step = 100)),
+                              column(6, p("1. Moving the slider to the rightmost position, marked \'1500\' means that you believe that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, you predict that the child will earn more per quarter if they enter foster care, compared to their quarterly earnings if the child remains at home."), 
+p("2. Moving the slider to the leftmost position, marked \'-1500\', means that you believe that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, you predict that the child will earn less per quarter if they enter foster care, compared to their quarterly earnings if the child remains at home.
+"))
+                               ),
+fluidRow(
+                         column(12,
+                                h4("Contributors"),
+                                p("As final project of Professor Andrew Gelman's Communicating Data & Statistics class, this app was created with R Shiny."),
+                                p("This app is collaborative work by Jessica Pac and Joo Won Park.")))
+))
+            )
+            )
+            ) # main panel till here
+)
+),
+  
+  tabPanel("Prediction",
+  sidebarLayout(
+    sidebarPanel(
+      # verbatimTextOutput("text"),
+                h4("Instructions"),
+                br(),
+                p("To see the predicted effect of foster care on the focal child, select the correct characteristics of the child and features of the case using the sliders and selectors below. For instance, if the child is six years old, slide the \'age\' slider to \'6.\' Your results will be shown on the gauges to the right."),
+      radioButtons("initrep", "Initial Reporter:",
+                   c("Physician" = "phys",
+                     "School" = "sch",
+                     "Police" = "police",
+                     "Family" = "fam",
+                     "Neighbor" = "neighbor",
+                     "Other Government" = "govt",
+                     "Anonymous" = "anon")),
+      br(),
+      sliderInput("age",
+                  "Age:",
+                  value = 5,min = 5,max = 16,step = 1),
+      br(),
+      radioButtons("sex",
+                  "Sex:",
+                  c("Girl" = "girl",
+                     "Boy" = "boy"
+                     )), # boy is 1
+      br(),
+      radioButtons("race", "Race:",
+                   c("White" = "white",
+                     "African American" = "black",
+                     "Hispanic" = "hisp"
+                     )),
+      br(),
+      radioButtons("allegation", "Allegation:",
+                   c("Physical Abuse" = "physical",
+                     "Substantial risk of harm" = "harm",
+                     "Other abuse" = "other",
+                     "Lack of supervision" = "supervision",
+                     "Environmental Neglect" = "neglect"
+                     )),
+      br(),
+      radioButtons("placement", "Placement:",
+                   c("Home" = "home",
+                     "Foster Care" = "fc"
+                     ))
+    ),
+    
+    mainPanel(tabsetPanel(
+              tabPanel("Result",
+                       fluidRow(
+                         column(12,
+                                h4("Juvenile Delinquency"), 
+                                p("Juvenile delinquency is defined as any involvement with the juvenile delinquency system, including but not limited to at least three arrests, any number of convictions, serving time in an institution, and referrals for service or intervention through a juvenile court, etc."),
+                                fluidRow(
+                                  column(6,
+                       gaugeOutput("gauge")),
+                                  column(6,p("1.The gauge pointed at the rightmost position, marked \'1\' means that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, the child is less likely to become involved in the juvenile delinquency system if they enter foster care, compared to the risk of being involved in the juvenile delinquency system if the child remains at home."), 
+p("2. The gauge pointed at the leftmost position, marked \'0\', means that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, the child is more likely to become involved in the juvenile delinquency system if they enter foster care, compared to the risk of being involved in the juvenile delinquency system if the child remains at home.
+"))
+                        ))),
+                       
+                        fluidRow(
+                        column(12,
+                               h4("Teen Motherhood"), 
+                               p("Teen motherhood is defined as a girl giving birth to a child at age 19 or younger. Move the slider below the gauge to indicate your prediction as to the likelihood of the child becoming a mother before age 19 if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                                 column(6,
+                        gaugeOutput("gauge2")),
+                                  column(6,p("1. The gauge pointed at the rightmost position, marked \'1\' means that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, the child is less likely to become pregnant if they enter foster care, compared to the risk of pregnancy if the child remains at home. "), 
+p("2. The gauge pointed at the leftmost position, marked \'0\', means that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, the child is more likely to become pregnant if they enter foster care, compared to the risk of pregnancy if the child remains at home.
+"))
+                         ))),
+                       
+                        fluidRow(
+                        column(12,
+                               h4("Employment"),
+                               p("First, employment is measured as the fraction of quarters during the year that the child will be employed later in life when they\'re a young adult (between ages 18 through 28). For example, selecting -.25 would imply that as a young adult, a child who has been removed from the home and placed into foster care will work one less quarter of the year compared to those who remain at home. Move the slider below the gauge to indicate your prediction of the number of quarters out of the year you believe the child will be employed if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                                column(6,
+                      gaugeOutput("gauge3")),
+                                column(6, p("1.The gauge pointed at the rightmost position, marked \'0.5\' means that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, the child is more likely to work the full year if they enter foster care, compared to the likelihood of working full year if the child remains at home. "), 
+p("2. The gauge pointed at the leftmost position, marked \'-0.5\', means that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, the child is less likely to work the full year if they enter foster care, compared to the likelihood of working full year if the child remains at home.
+"))
+                         ))),
+
+                      fluidRow(
+                        column(12,
+                               h4("Earning"),
+                               p("Second, we also measure employment as the average quarterly earnings that the child will earn later in life, when they\'re a young adult (between ages 18 through 28). For example, selecting $1,000 would suggest that as a young adult, a child who has been removed from the home and placed into foster care will earn an additional $1,000 per quarter compared to those who remain at home. Move the slider below the gauge to indicate your prediction of the quarterly earnings you believe the child will be receive if they are removed from their home and placed into foster care, compared to remaining at home."),
+                               fluidRow(
+                              column(6,
+                       gaugeOutput("gauge4")),
+                              column(6, p("1. The gauge pointed at the rightmost position, marked \'1500\' means that this child will be better off if they\'re removed from their home and placed into foster care, compared to remaining at home. In other words, the child will earn more per quarter if they enter foster care, compared to their quarterly earnings if the child remains at home."), 
+p("2. The gauge pointed at the leftmost position, marked \'-1500\', means that this child will be worse off if they\'re removed from their home and placed into foster care. In other words, the child will earn less per quarter if they enter foster care, compared to their quarterly earnings if the child remains at home.
+"))
+                               ),
+fluidRow(
+                         column(12,
+                                h4("Contributors"),
+                                p("As final project of Professor Andrew Gelman's Communicating Data & Statistics class, this app was created with R Shiny."),
+                                p("This app is collaborative work by Jessica Pac and Joo Won Park.")))
+))
+            )
+            )
+            ) # main panel till here
+  )
+) #this should be end of tabPanel 
+
+) #end of navbar
+) #fluidpage
+
+
+
+# Juvenile Delinquency Probit Coefficient
+juv_initrep = c(0,0,0.02,0,0.01,0.03, 0.01) #7
+juv_age = c(0,0.06,0.10,0.13,0.13,0.17,0.19,0.22,0.23,0.23,0.12,0) #12
+juv_sex = c(0.19) # coefficient for boy (boy = 1)
+juv_race = c(-0.07,-0.02,-0.07) #3
+juv_alleg =  c(-0.01,-0.03,-0.02,-0.02,-0.02) #5
+juv_fx = c(0,0.35)
+
+# Teen Motherhood Probit Coefficient
+tm_initrep = c(0,0.01,0,0.01,0.01,0.02, -0.01) #7
+tm_age = c(0.18,0.25,0.31,0.39,0.46,0.49,0.56,0.6,0.65,0.67,0.69,0) #12
+tm_sex = c(0) # coefficient for boy (boy = 1)
+tm_race = c(0.08,0.22,0.18) #3
+tm_alleg =  c(-0.01,-0.01,0.01,0.01,0.02) #5
+tm_fx = c(0,0.291)
+
+# Employment OLS Coefficient (fraction of quarters that the individual was employed in 2002. 
+qw_initrep = c(0.01,0,0,0.02,0,0.01,0) #7
+qw_age = c(0,0,0.01,0,0.03,0.04,0.04,0.04,0.04,0.04,0.06,0.06) #12
+qw_sex = c(-0.07) # coefficient for boy (boy = 1)
+qw_race = c(0.04,-0.06,0.03) #3
+qw_alleg =  c(0.04,0.04,0.02,0.03,0.01) #5
+qw_fx = c(0,-0.154)
+
+# Earnings OLS Coefficient(average quarterly earnings)
+earn_initrep = c(-5.1,-89.2,-57.7,11.7,-107.1,0.6,-79.5) #7
+earn_age = c(0,0,173.4,201.5,477.8,619.1,714.5,794.2,898,1019.7,1190.3,1263.1) #12
+earn_sex = c(-83.4) # coefficient for boy (boy = 1)
+earn_race = c(-8.9,-513.6,27) #3
+earn_alleg =  c(211.6,221.7,159.7,182.9,113.0) #5
+earn_fx = c(0,-1296)
+
+
+server <- function(input, output) {
+
+  i <- reactive({
+    initrep <- switch(input$initrep, 
+                   phys = c(1,0,0,0,0,0,0), 
+                   sch = c(0,1,0,0,0,0,0),
+                   police = c(0,0,1,0,0,0,0),
+                   fam = c(0,0,0,1,0,0,0),
+                   neighbor = c(0,0,0,0,1,0,0),
+                   govt = c(0,0,0,0,0,1,0),
+                   anon = c(0,0,0,0,0,0,1)
+                   ) 
+
+    initrep
+  })
+
+  
+  a <- reactive({
+    age <- switch(input$age, 
+                  "15" = c(0,0,0,0,0,1,0,0,0,0),
+                  "16" = c(0,0,0,0,0,0,1,0,0,0),
+                  "17" = c(0,0,0,0,0,0,0,1,0,0),
+                  "18" = c(0,0,0,0,0,0,0,0,1,0),
+                  "5" = c(1,0,0,0,0,0,0,0,0,0,0,0),
+                  "6" = c(0,1,0,0,0,0,0,0,0,0,0,0),
+                  "7" = c(0,0,1,0,0,0,0,0,0,0,0,0),
+                  "8" = c(0,0,0,1,0,0,0,0,0,0,0,0),
+                  "9" = c(0,0,0,0,1,0,0,0,0,0,0,0),
+                  "10" = c(0,0,0,0,0,1,0,0,0,0,0,0),
+                  "11" = c(0,0,0,0,0,0,1,0,0,0,0,0),
+                  "12" = c(0,0,0,0,0,0,0,1,0,0,0,0),
+                  "13" = c(0,0,0,0,0,0,0,0,1,0,0,0),
+                  "14" = c(0,0,0,0,0,0,0,0,0,1,0,0),
+                  "15" = c(0,0,0,0,0,0,0,0,0,0,1,0),
+                  "16" = c(0,0,0,0,0,0,0,0,0,0,0,1)
+                  )
+
+    age
+  })
+  
+  s <- reactive({
+    sex <- switch(input$sex, 
+                   girl = c(0), 
+                   boy = c(1)
+                   )
+
+    sex
+  })
+
+  
+  
+  r <- reactive({
+    race <- switch(input$race, 
+                   white = c(1,0,0), 
+                   black = c(0,1,0),
+                   hisp = c(0,0,1)
+                   )
+
+    race
+  })
+
+  al <- reactive({
+    allegation <- switch(input$allegation, 
+                   physical = c(1,0,0,0,0),
+                   harm = c(0,1,0,0,0),
+                   other = c(0,0,1,0,0),
+                   supervision = c(0,0,0,1,0),
+                   neglect = c(0,0,0,0,1)
+                   )
+
+    allegation
+  })
+  
+  pl <- reactive({
+    placement <- switch(input$placement, 
+                   home = c(1,0),
+                   fc = c(0,1)
+                   )
+
+    placement
+  })
+
+    
+  output$gauge = renderGauge({
+
+    gauge(round(pnorm(sum(juv_fx*pl()) + sum(juv_initrep*i()) + sum(juv_age*a()) + sum(juv_sex*s()) + sum(juv_race*r()) + sum(juv_alleg*al())),2),
+          min = 0, 
+          max = 1,
+          label = 'Juvenile Delinquency',
+          sectors = gaugeSectors(success = c(0.7, 1), 
+                                 warning = c(0.3, 0.7),
+                                 danger = c(0, 0.3)))
+  })
+  
+  output$gauge2 = renderGauge({
+
+    gauge(round(pnorm(sum(tm_fx*pl()) +sum(tm_initrep*i()) + sum(tm_age*a()) + sum(tm_sex*s()) + sum(tm_race*r()) + sum(tm_alleg*al())),2),
+          min = 0, 
+          max = 1,
+          label = 'Teen Motherhood',
+          sectors = gaugeSectors(success = c(0.7, 1), 
+                                 warning = c(0.3, 0.7),
+                                 danger = c(0, 0.3)))
+  })
+  
+    output$gauge3 = renderGauge({
+
+    gauge(round((sum(qw_fx*pl()) + sum(qw_initrep*i()) + sum(qw_age*a()) + sum(qw_sex*s()) + sum(qw_race*r()) + sum(qw_alleg*al())),2),
+          min = -0.5, 
+          max = 0.5,
+          label = 'Employment',
+          sectors = gaugeSectors(success = c(0.2, 0.5),
+                                 warning = c(-0.1,0.2),
+                                 danger = c(-0.5, -0.1)))
+  })
+
+      output$gauge4  = renderGauge({
+
+    gauge(round((sum(earn_fx*pl()) + sum(earn_initrep*i()) + sum(earn_age*a()) + sum(earn_sex*s()) + sum(earn_race*r()) + sum(earn_alleg*al())),2),
+          min = -1500, 
+          max = 1500,
+          label = 'Earnings',
+          sectors = gaugeSectors(success = c(500, 1500), 
+                                 warning = c(-500,500),
+                                 danger = c(-1500, -500)))
+  })
+
+
+### GUESSING PART
+
+      
+  output$guess1 = renderGauge({
+
+    gauge(input$guess_jd,
+          min = 0, 
+          max = 1,
+          label = 'Juvenile Delinquency',
+          sectors = gaugeSectors(success = c(0.4, 1), 
+                                 warning = c(0.3, 0.4),
+                                 danger = c(0, 0.3)))
+  })
+  
+  output$guess2 = renderGauge({
+
+    gauge(input$guess_tm,
+          min = 0, 
+          max = 1,
+          label = 'Teen Motherhood',
+          sectors = gaugeSectors(success = c(0.4, 1), 
+                                 warning = c(0.3, 0.4),
+                                 danger = c(0, 0.3)))
+  })
+  
+    output$guess3 = renderGauge({
+
+    gauge(input$guess_emp,
+    
+          min = -0.5, 
+          max = 0.5,
+          label = 'Employment',
+          sectors = gaugeSectors(success = c(0.33, 0.5), 
+                                 warning = c(0, 0.33),
+                                 danger = c(-0.5, 0)))
+  })
+      
+      
+      
+      output$guess4  = renderGauge({
+
+    gauge(input$guess_earn,
+          min = -1500, 
+          max = 1500,
+          label = 'Earnings',
+          sectors = gaugeSectors(success = c(500, 1500), 
+                                 warning = c(-500, 500),
+                                 danger = c(-1500, -500)))
+  })
+
+  
+
+
+}
+
+# Create Shiny app ----
+shinyApp(ui, server)
+
+
+```
+
+
